@@ -1,4 +1,6 @@
 
+python-dotenv
+
 celery[redis]
 flower
 

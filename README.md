@@ -11,13 +11,24 @@
 docker run --name myredis -p 6379:6379 -d redis --requirepass "mypassword"
 ```
 
-
+### Python 环境
 ```
 # Python 虚拟环境
 conda create --name ai_asr python=3.10
 
 pip install -r requirements.txt
 ```
+
+### 配置文
+
+```
+cp .env.example .env
+
+# 修改配置文件
+vi .env
+```
+
+
 
 ## 启动
 
