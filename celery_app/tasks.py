@@ -7,6 +7,7 @@ import random
 from celery import group, chain
 from celery.utils.log import get_task_logger
 
+from core.models import ResultModel, db_session
 from .celery import app
 
 
@@ -47,6 +48,11 @@ def merge_task(task_id):
     _st = time.time()
 
     time.sleep(random.randint(1, 3))
+
+    # 存储结果到数据库
+    new_result = ResultModel(task_id=task_id, result='result' + task_id)
+    db_session.add(new_result)
+    db_session.commit()
 
     logger.info('合并结果完成 %s，耗时：%s', task_id, time.time() - _st)
 

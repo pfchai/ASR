@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 
 import uuid
 
 from flask import Flask, jsonify, request
 
 from celery_app.tasks import submit_task
+from core.models import ResultModel, db_session
 
 
 app = Flask(__name__)
@@ -27,6 +29,14 @@ def submit_task_api():
     result = submit_task.delay(url, task_id, **kwargs)
     return jsonify({"task_id": task_id}), 202
 
+
+@app.route('/get_result/<task_id>', methods=['GET'])
+def get_result(task_id):
+    result = db_session.query(ResultModel).filter_by(task_id=task_id).first()
+    if result:
+        return jsonify({"task_id": task_id, "result": result.result})
+    else:
+        return jsonify({"task_id": task_id, "result": "Pending or Not Found"}), 404
 
 if __name__ == '__main__':
     app.run(debug=True, port=5012)
