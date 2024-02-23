@@ -8,6 +8,7 @@ from celery import group, chain
 from celery.utils.log import get_task_logger
 
 from core.models import ResultModel, db_session
+from core.models import TaskStatus, update_status, update_result
 from .celery import app
 
 
@@ -15,10 +16,11 @@ logger = get_task_logger(__name__)
 
 
 @app.task(name='celery_app.tasks.download_audio')
-def download_audio(url):
+def download_audio(task_id, url):
     logger.info('run download_audio')
 
     time.sleep(random.randint(3, 10))
+    update_status(task_id, TaskStatus.TO_BE_PROCESSED)
 
 
 @app.task(name='celery_app.tasks.asr_task', ignore_result=True)
@@ -50,10 +52,7 @@ def merge_task(task_id):
     time.sleep(random.randint(1, 3))
 
     # 存储结果到数据库
-    new_result = ResultModel(task_id=task_id, result='result' + task_id)
-    db_session.add(new_result)
-    db_session.commit()
-
+    update_result(task_id, 'result ' + task_id)
     logger.info('合并结果完成 %s，耗时：%s', task_id, time.time() - _st)
 
 
@@ -63,7 +62,7 @@ def submit_task(url, task_id, **kwargs):
 
     process = group(asr_task.si(task_id), speaker_diarization_task.si(task_id))
 
-    chain = download_audio.si(url) | process | merge_task.si(task_id)
+    chain = download_audio.si(task_id, url) | process | merge_task.si(task_id)
     chain()
 
     return 'success'

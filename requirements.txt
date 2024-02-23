@@ -5,4 +5,4 @@ celery[redis]
 flower
 
 flask
-sqlalchemy
+sqlalchemy==1.4.51
