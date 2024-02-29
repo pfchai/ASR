@@ -6,3 +6,13 @@ flower
 
 flask
 sqlalchemy==1.4.51
+
+requests
+openai-whisper
+pyannote.audio
+
+torch
+torchvision
+
+transformers
+ffmpeg-python
